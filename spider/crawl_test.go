@@ -25,20 +25,6 @@ func TestDistributedCrawl(t *testing.T) {
 	assertResults(t, gotResults(&buf), wantResults())
 }
 
-func gotResults(buf *bytes.Buffer) []string {
-	strs := strings.Trim(buf.String(), "\n")
-	got := strings.Split(strs, "\n")
-	return got
-}
-
-func assertResults(t *testing.T, got, want []string) {
-	sort.Strings(got)
-	sort.Strings(want)
-	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("got %v, want %v", got, want)
-	}
-}
-
 func BenchmarkSequentialCrawl(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		spider.SequentialCrawl("https://golang.org/", 4, fetcher, ioutil.Discard)
@@ -107,4 +93,18 @@ func wantResults() []string {
 	}
 
 	return results
+}
+
+func gotResults(buf *bytes.Buffer) []string {
+	strs := strings.Trim(buf.String(), "\n")
+	got := strings.Split(strs, "\n")
+	return got
+}
+
+func assertResults(t *testing.T, got, want []string) {
+	sort.Strings(got)
+	sort.Strings(want)
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %v, want %v", got, want)
+	}
 }
