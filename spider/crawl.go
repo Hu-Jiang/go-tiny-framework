@@ -19,8 +19,13 @@ type Fetcher interface {
 // url which has been crawl and
 // goroutine when spider is Distributed.
 type Record struct {
-	visitedUrl sync.Map // visitedUrl is url which has been visited
-	wg         sync.WaitGroup
+	wg sync.WaitGroup
+
+	// visitedUrl is used to record url which has been visited.
+	//
+	// If your never want to crawl some pages, you can
+	// init it with that urls before you execute crawl actually.
+	visitedUrl sync.Map
 }
 
 // Sequential crawl url sequentially, waiting for each crawl task to
@@ -87,10 +92,10 @@ func (r *Record) DistributedCrawl(url string, depth int, fetcher Fetcher, w io.W
 
 // Ref:
 // https://tour.golang.org/concurrency/10
-
+//
 // Follow up:
 // - DI, change point, interface, callback.
-// - Pass args by interface, return struct.
-// - If to many args pass to function, and some are optional,
+// - Accept interfaces, returns structs.
+// - If too many args pass to function, and some are optional,
 // consider functional options pattern:
 // https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
