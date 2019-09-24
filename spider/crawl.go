@@ -41,14 +41,12 @@ func (r *Record) SequentialCrawl(url string, depth int, fetcher Fetcher, w io.Wr
 	}
 
 	if _, ok := r.visitedUrl.Load(url); ok {
-		// fmt.Printf("has been visited: %s\n", url)
 		return
 	}
 	r.visitedUrl.Store(url, struct{}{})
 
 	body, urls, err := fetcher.Fetch(url)
 	if err != nil {
-		// fmt.Println(err)
 		return
 	}
 	fmt.Fprintf(w, "found: %s %q\n", url, body)
@@ -79,7 +77,6 @@ func (r *Record) DistributedCrawl(url string, depth int, fetcher Fetcher, w io.W
 
 	body, urls, err := fetcher.Fetch(url)
 	if err != nil {
-		// fmt.Println(err)
 		return
 	}
 	fmt.Fprintf(w, "found: %s %q\n", url, body)
@@ -99,3 +96,63 @@ func (r *Record) DistributedCrawl(url string, depth int, fetcher Fetcher, w io.W
 // - If too many args pass to function, and some are optional,
 // consider functional options pattern:
 // https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
+//
+// More about interface:
+// 1.
+// The consumer should define the interface. If you’re defining an interface
+// and an implementation in the same package, you may be doing it wrong.
+//
+// Consumers should describe the behaviour they expect with an interface.
+//
+// As with all rules, there are exceptions. But the rule of thumb of accept
+// interfaces return structs is a good guideline I think.
+//
+// The only hard and fast rule or programming that I know is that there are
+// no rules, only guidelines, principals, and trade offs.
+//
+// Yeah, the second part “return structs/concrete types” I’m less sure about.
+// But consuming interfaces that you, the caller, defines, I’m pretty sure about.
+//
+// 														- Dave Cheney.
+//
+// Ref: https://twitter.com/davecheney/status/942593128355192832
+//
+// 2.
+// Go interfaces generally belong in the package that uses values of the interface
+// type, not the package that implements those values. The implementing package
+// should return concrete (usually pointer or struct) types: that way, new methods
+// can be added to implementations without requiring extensive refactoring.
+//
+// Do not define interfaces on the implementor side of an API "for mocking";
+// instead, design the API so that it can be tested using the public API of
+// the real implementation.
+//
+// Do not define interfaces before they are used: without a realistic example of
+// usage, it is too difficult to see whether an interface is even necessary, let
+// alone what methods it ought to contain.
+//
+// Example:
+//
+// package consumer  // consumer.go
+//
+// type Thinger interface { Thing() bool }
+//
+// func Foo(t Thinger) string { … }
+//
+//
+// package producer
+//
+// type Thinger struct{ … }
+// func (t Thinger) Thing() bool { … }
+//
+// func NewThinger() Thinger { return Thinger{ … } }
+//
+//
+// package consumer_test // consumer_test.go
+//
+// type fakeThinger struct{ … }
+// func (t fakeThinger) Thing() bool { … }
+// …
+// if consumer.Foo(fakeThinger{…}) == "x" { … }
+//
+// Ref: https://github.com/golang/go/wiki/CodeReviewComments#interfaces
